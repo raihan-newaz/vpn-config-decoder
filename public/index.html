@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Config Decoder & Encoder — Universal Tunnel Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        pre, code, .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-btn {
+            box-shadow: 0 0 20px -3px rgba(59, 130, 246, 0.5);
+        }
+        .glow-btn:hover {
+            box-shadow: 0 0 25px 0px rgba(59, 130, 246, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-[#0B0F19] text-gray-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Glow / Background effects -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-blue-600/10 via-indigo-600/5 to-transparent pointer-events-none blur-3xl -z-10"></div>
+
+    <!-- Header Navigation -->
+    <header class="border-b border-gray-800/80 sticky top-0 bg-[#0B0F19]/80 backdrop-blur-md z-30">
+        <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                    <i class="fas fa-shield-halved text-lg"></i>
+                </div>
+                <div>
+                    <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">Config Decoder</span>
+                    <span class="text-xs px-2 py-0.5 ml-2 font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">Pro</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 text-sm">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Local & API Active
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8 md:py-12">
+
+        <!-- Title Section -->
+        <div class="text-center mb-8">
+            <h1 id="pageTitle" class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2">
+                VPN Configuration Decoder
+            </h1>
+            <p id="pageDesc" class="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
+                Decrypt and view Dark Tunnel, HTTP Custom, HTTP Injector, NPV Tunnel, and SSC configs in one click.
+            </p>
+        </div>
+
+        <!-- Mode Toggle (Decode vs Encode) -->
+        <div class="flex max-w-sm mx-auto p-1.5 bg-gray-900/90 rounded-2xl border border-gray-800 mb-8 shadow-inner">
+            <button id="modeDecode" class="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-blue-600 text-white shadow-md shadow-blue-600/30">
+                <i class="fas fa-lock-open mr-1.5"></i> Decode
+            </button>
+            <button id="modeEncode" class="flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 text-gray-400 hover:text-white">
+                <i class="fas fa-lock mr-1.5"></i> Encode
+            </button>
+        </div>
+
+        <!-- Main Card -->
+        <div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
+
+            <!-- Tool Selector -->
+            <div class="mb-6">
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+                    Select Tunnel / Format
+                </label>
+                <div class="relative">
+                    <select id="decoderSelect" class="w-full bg-gray-900 border border-gray-700/80 rounded-2xl px-4 py-3.5 text-white font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer transition-all">
+                        <option value="DARKTUNNEL" selected>⚡ Dark Tunnel (.dark / darktunnel://)</option>
+                        <option value="HTTPCUSTOM">🌐 HTTP Custom (.hc / custom://)</option>
+                        <option value="HTTPINJECTOR">💉 HTTP Injector (.ehi)</option>
+                        <option value="NPVTUNNEL">⚡ NPV Tunnel (.npv / .npv4)</option>
+                        <option value="SSCCUSTOM">🛡️ SSC Custom (.ssc)</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Tabs (Upload File vs Paste Text) -->
+            <div class="border-b border-gray-800 mb-6">
+                <div class="flex space-x-6 text-sm font-semibold">
+                    <button id="tabUpload" class="pb-3 border-b-2 border-blue-500 text-blue-400 flex items-center gap-2 transition-all">
+                        <i class="fas fa-cloud-arrow-up"></i> Upload File
+                    </button>
+                    <button id="tabPaste" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-gray-200 flex items-center gap-2 transition-all">
+                        <i class="fas fa-paste"></i> Paste Text / URL
+                    </button>
+                </div>
+            </div>
+
+            <!-- File Upload Area -->
+            <div id="uploadArea" class="mb-6">
+                <div id="dropZone" class="border-2 border-dashed border-gray-700 hover:border-blue-500 bg-gray-900/40 hover:bg-gray-800/40 rounded-2xl p-8 text-center cursor-pointer transition-all">
+                    <input type="file" id="fileInput" class="hidden" accept=".dark,.hc,.ehi,.npv,.npv4,.ssc,*">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fas fa-file-shield"></i>
+                    </div>
+                    <p class="font-semibold text-white mb-1">Click to browse or drag & drop config file</p>
+                    <p class="text-xs text-gray-500">Supports .dark, .hc, .ehi, .npv, .ssc or any locked config</p>
+                </div>
+
+                <!-- Selected File Display -->
+                <div id="fileInfo" class="hidden mt-3 p-3.5 bg-gray-900 rounded-xl border border-gray-800 flex items-center justify-between">
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0 text-sm">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <span id="fileName" class="text-sm font-medium text-white truncate max-w-md">filename.dark</span>
+                    </div>
+                    <button id="removeFile" class="text-gray-400 hover:text-red-400 p-1.5 transition-colors">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Paste Input Area -->
+            <div id="pasteArea" class="hidden mb-6">
+                <textarea id="pasteInput" rows="5" placeholder="Paste config raw content, base64 string, or darktunnel:// URL here..."
+                    class="w-full bg-gray-900 border border-gray-700/80 rounded-2xl p-4 text-sm font-mono text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"></textarea>
+            </div>
+
+            <!-- Action Button -->
+            <button id="actionBtn" class="w-full py-4 rounded-2xl font-bold text-white bg-blue-600 hover:bg-blue-500 glow-btn transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fas fa-bolt"></i> <span id="btnText">Decode Configuration</span>
+            </button>
+
+            <!-- Error Notification -->
+            <div id="errorMsg" class="hidden mt-4 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3">
+                <i class="fas fa-triangle-exclamation text-base flex-shrink-0"></i>
+                <span id="errorText">Error message here</span>
+            </div>
+
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultSection" class="hidden mt-8 space-y-6">
+
+            <!-- Fast Quick-View Credentials Card (if detected) -->
+            <div id="quickCard" class="hidden glass-card rounded-3xl p-6 border-blue-500/30 shadow-xl bg-gradient-to-br from-blue-950/30 to-gray-900/60">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-base text-blue-300 flex items-center gap-2">
+                        <i class="fas fa-key"></i> Extracted Credentials
+                    </h3>
+                    <span id="quickProfileName" class="text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 font-medium">Profile</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                    <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-gray-400 block">Server / Host</span>
+                            <span id="quickHost" class="font-mono text-white font-medium">-</span>
+                        </div>
+                        <button onclick="copyText('quickHost')" class="text-gray-400 hover:text-white p-1"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-gray-400 block">Port</span>
+                            <span id="quickPort" class="font-mono text-white font-medium">-</span>
+                        </div>
+                        <button onclick="copyText('quickPort')" class="text-gray-400 hover:text-white p-1"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-gray-400 block">Username</span>
+                            <span id="quickUser" class="font-mono text-emerald-400 font-bold">-</span>
+                        </div>
+                        <button onclick="copyText('quickUser')" class="text-gray-400 hover:text-white p-1"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-gray-400 block">Password</span>
+                            <span id="quickPass" class="font-mono text-emerald-400 font-bold">-</span>
+                        </div>
+                        <button onclick="copyText('quickPass')" class="text-gray-400 hover:text-white p-1"><i class="fas fa-copy"></i></button>
+                    </div>
+                </div>
+                <div id="quickPayloadBox" class="hidden p-3 bg-gray-900/80 rounded-xl border border-gray-800">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs text-gray-400">Payload / Headers</span>
+                        <button onclick="copyText('quickPayload')" class="text-xs text-blue-400 hover:text-blue-300"><i class="fas fa-copy"></i> Copy</button>
+                    </div>
+                    <p id="quickPayload" class="text-xs font-mono text-gray-300 break-all"></p>
+                </div>
+            </div>
+
+            <!-- Full JSON / Output Viewer -->
+            <div class="glass-card rounded-3xl p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400">
+                        <i class="fas fa-code mr-1"></i> Full Decoded JSON Output
+                    </span>
+                    <div class="flex items-center space-x-2">
+                        <button id="copyAllBtn" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-all flex items-center gap-1.5 border border-gray-700">
+                            <i class="fas fa-copy"></i> Copy All
+                        </button>
+                        <button id="downloadBtn" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-blue-600/80 hover:bg-blue-600 text-white transition-all flex items-center gap-1.5">
+                            <i class="fas fa-download"></i> Save .json
+                        </button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <pre id="outputPre" class="p-4 bg-gray-950/90 rounded-2xl text-xs font-mono text-gray-200 overflow-x-auto max-h-[500px] border border-gray-800"></pre>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800/60 py-6 text-center text-xs text-gray-500 mt-12">
+        <p>Config Decoder & Encoder • Built for fast local & serverless decryption</p>
+    </footer>
+
+    <!-- Frontend Script -->
+    <script>
+        const modeDecode = document.getElementById('modeDecode');
+        const modeEncode = document.getElementById('modeEncode');
+        const pageTitle = document.getElementById('pageTitle');
+        const pageDesc = document.getElementById('pageDesc');
+        const tabUpload = document.getElementById('tabUpload');
+        const tabPaste = document.getElementById('tabPaste');
+        const uploadArea = document.getElementById('uploadArea');
+        const pasteArea = document.getElementById('pasteArea');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const removeFile = document.getElementById('removeFile');
+        const pasteInput = document.getElementById('pasteInput');
+        const decoderSelect = document.getElementById('decoderSelect');
+        const actionBtn = document.getElementById('actionBtn');
+        const btnText = document.getElementById('btnText');
+        const errorMsg = document.getElementById('errorMsg');
+        const errorText = document.getElementById('errorText');
+        const resultSection = document.getElementById('resultSection');
+        const outputPre = document.getElementById('outputPre');
+        const copyAllBtn = document.getElementById('copyAllBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let currentMode = 'decode';
+        let currentInputType = 'file';
+        let selectedFile = null;
+
+        // Mode Switch
+        modeDecode.addEventListener('click', () => setMode('decode'));
+        modeEncode.addEventListener('click', () => setMode('encode'));
+
+        function setMode(mode) {
+            currentMode = mode;
+            if (mode === 'decode') {
+                pageTitle.textContent = 'VPN Configuration Decoder';
+                pageDesc.textContent = 'Decrypt and view Dark Tunnel, HTTP Custom, HTTP Injector, NPV Tunnel, and SSC configs in one click.';
+                btnText.textContent = 'Decode Configuration';
+                modeDecode.className = 'flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-blue-600 text-white shadow-md shadow-blue-600/30';
+                modeEncode.className = 'flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 text-gray-400 hover:text-white';
+            } else {
+                pageTitle.textContent = 'VPN Configuration Encoder';
+                pageDesc.textContent = 'Encrypt JSON and generate locked tunnel configurations.';
+                btnText.textContent = 'Encode Configuration';
+                modeEncode.className = 'flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-emerald-600 text-white shadow-md shadow-emerald-600/30';
+                modeDecode.className = 'flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 text-gray-400 hover:text-white';
+            }
+        }
+
+        // Tab Switch
+        tabUpload.addEventListener('click', () => {
+            currentInputType = 'file';
+            tabUpload.className = 'pb-3 border-b-2 border-blue-500 text-blue-400 flex items-center gap-2 transition-all';
+            tabPaste.className = 'pb-3 border-b-2 border-transparent text-gray-400 hover:text-gray-200 flex items-center gap-2 transition-all';
+            uploadArea.classList.remove('hidden');
+            pasteArea.classList.add('hidden');
+        });
+
+        tabPaste.addEventListener('click', () => {
+            currentInputType = 'text';
+            tabPaste.className = 'pb-3 border-b-2 border-blue-500 text-blue-400 flex items-center gap-2 transition-all';
+            tabUpload.className = 'pb-3 border-b-2 border-transparent text-gray-400 hover:text-gray-200 flex items-center gap-2 transition-all';
+            pasteArea.classList.remove('hidden');
+            uploadArea.classList.add('hidden');
+        });
+
+        // File drop
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-blue-500'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-blue-500'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-blue-500');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileInfo.classList.remove('hidden');
+            dropZone.classList.add('hidden');
+            errorMsg.classList.add('hidden');
+
+            // auto-select decoder based on file extension
+            const lower = file.name.toLowerCase();
+            if (lower.endsWith('.dark')) decoderSelect.value = 'DARKTUNNEL';
+            else if (lower.endsWith('.hc')) decoderSelect.value = 'HTTPCUSTOM';
+            else if (lower.endsWith('.ehi')) decoderSelect.value = 'HTTPINJECTOR';
+            else if (lower.endsWith('.npv') || lower.endsWith('.npv4')) decoderSelect.value = 'NPVTUNNEL';
+            else if (lower.endsWith('.ssc')) decoderSelect.value = 'SSCCUSTOM';
+        }
+
+        removeFile.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            fileInfo.classList.add('hidden');
+            dropZone.classList.remove('hidden');
+        });
+
+        // Submit action
+        actionBtn.addEventListener('click', async () => {
+            errorMsg.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            document.getElementById('quickCard').classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('decoder', decoderSelect.value);
+            formData.append('input_type', currentInputType);
+
+            if (currentInputType === 'file') {
+                if (!selectedFile) {
+                    showError('Please choose or drop a config file first.');
+                    return;
+                }
+                formData.append('file', selectedFile);
+            } else {
+                const text = pasteInput.value.trim();
+                if (!text) {
+                    showError('Please paste config content or link.');
+                    return;
+                }
+                formData.append('text', text);
+            }
+
+            actionBtn.disabled = true;
+            actionBtn.classList.add('opacity-60', 'cursor-not-allowed');
+            const originalHtml = actionBtn.innerHTML;
+            actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            const endpoint = currentMode === 'decode' ? '/api/decode' : '/api/encode';
+
+            try {
+                const res = await fetch(endpoint, { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (res.ok && data.result) {
+                    outputPre.textContent = data.result;
+                    resultSection.classList.remove('hidden');
+                    downloadBtn.dataset.content = data.result;
+                    downloadBtn.dataset.filename = data.filename || 'config_decoded.json';
+
+                    // Try parse quick view
+                    try {
+                        const parsed = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+                        populateQuickView(parsed);
+                    } catch(e) {}
+
+                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    showError(data.error || 'Failed to process configuration.');
+                }
+            } catch (err) {
+                showError('Network error or server unavailable. Please try again.');
+            } finally {
+                actionBtn.disabled = false;
+                actionBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+                actionBtn.innerHTML = originalHtml;
+            }
+        });
+
+        function populateQuickView(jsonObj) {
+            let host = '', port = '', user = '', pass = '', payload = '', name = '';
+            
+            // DarkTunnel structure
+            const enc = jsonObj.encryptedLockedConfig || {};
+            const inner = enc.EncryptedLockedConfig || {};
+            const ssh = inner.SshConfig || {};
+            const inject = inner.InjectConfig || {};
+            
+            host = ssh.EncryptedHost || jsonObj.server || jsonObj.host || '';
+            port = ssh.EncryptedPort || jsonObj.port || '';
+            user = ssh.EncryptedUsername || jsonObj.user || jsonObj.username || '';
+            pass = ssh.EncryptedPassword || jsonObj.pass || jsonObj.password || '';
+            payload = inject.EncryptedPayload || jsonObj.payload || '';
+            name = (enc.LockedAppConfig && enc.LockedAppConfig.ConnectedMessage) || jsonObj.name || 'Config';
+
+            if (host || user || pass) {
+                document.getElementById('quickHost').textContent = host || 'N/A';
+                document.getElementById('quickPort').textContent = port || 'N/A';
+                document.getElementById('quickUser').textContent = user || 'N/A';
+                document.getElementById('quickPass').textContent = pass || 'N/A';
+                document.getElementById('quickProfileName').textContent = name;
+                
+                if (payload) {
+                    document.getElementById('quickPayload').textContent = payload;
+                    document.getElementById('quickPayloadBox').classList.remove('hidden');
+                } else {
+                    document.getElementById('quickPayloadBox').classList.add('hidden');
+                }
+                document.getElementById('quickCard').classList.remove('hidden');
+            }
+        }
+
+        function showError(msg) {
+            errorText.textContent = msg;
+            errorMsg.classList.remove('hidden');
+            errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function copyText(elemId) {
+            const text = document.getElementById(elemId).textContent;
+            navigator.clipboard.writeText(text);
+            alert('Copied: ' + text);
+        }
+
+        copyAllBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(outputPre.textContent);
+            copyAllBtn.innerHTML = '<i class="fas fa-check text-emerald-400"></i> Copied!';
+            setTimeout(() => { copyAllBtn.innerHTML = '<i class="fas fa-copy"></i> Copy All'; }, 1800);
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const blob = new Blob([downloadBtn.dataset.content || outputPre.textContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = downloadBtn.dataset.filename || 'config_decoded.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
