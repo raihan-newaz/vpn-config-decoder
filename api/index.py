@@ -116,7 +116,6 @@ def proxy_upstream(endpoint, data_dict, files_dict=None):
     with urllib.request.urlopen(req, timeout=30) as res:
         return json.loads(res.read().decode("utf-8"))
 
-@app.route('/api/decode', methods=['POST'])
 def handle_decode():
     decoder = request.form.get('decoder', 'DARKTUNNEL')
     input_type = request.form.get('input_type', 'file')
@@ -143,9 +142,9 @@ def handle_decode():
                     "engine": "local-native"
                 })
         except Exception as err:
-            pass # fallback to upstream
+            pass
 
-    # Fallback to upstream proxy for all formats (HTTPCUSTOM, HTTPINJECTOR, NPVTUNNEL, SSCCUSTOM, etc.)
+    # Fallback to upstream proxy for all formats
     data_dict = {"decoder": decoder, "input_type": input_type}
     files_dict = {}
     if input_type == 'file' and 'file' in request.files:
@@ -161,7 +160,6 @@ def handle_decode():
     except Exception as e:
         return jsonify({"error": f"Decoding failed: {str(e)}"}), 500
 
-@app.route('/api/encode', methods=['POST'])
 def handle_encode():
     decoder = request.form.get('decoder', 'DARKTUNNEL')
     input_type = request.form.get('input_type', 'text')
@@ -179,9 +177,15 @@ def handle_encode():
     except Exception as e:
         return jsonify({"error": f"Encoding failed: {str(e)}"}), 500
 
-@app.route('/api/health', methods=['GET'])
-def health():
-    return jsonify({"status": "ok", "offline_supported": OFFLINE_SUPPORTED})
+@app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
+@app.route('/<path:path>', methods=['GET', 'POST'])
+def catch_all(path):
+    if request.method == 'GET':
+        return jsonify({"status": "ok", "path_received": path, "offline_supported": OFFLINE_SUPPORTED})
+    
+    if 'encode' in path:
+        return handle_encode()
+    return handle_decode()
 
 if __name__ == '__main__':
     app.run(port=3000, debug=True)
