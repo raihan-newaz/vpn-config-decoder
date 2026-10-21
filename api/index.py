@@ -114,7 +114,14 @@ def proxy_upstream(endpoint, data_dict, files_dict=None):
         }
     )
     with urllib.request.urlopen(req, timeout=30) as res:
-        return json.loads(res.read().decode("utf-8"))
+        res_data = json.loads(res.read().decode("utf-8"))
+        if "result" in res_data and isinstance(res_data["result"], str):
+            try:
+                parsed_res = json.loads(res_data["result"])
+                res_data["result"] = json.dumps(parsed_res, indent=4, ensure_ascii=False)
+            except Exception:
+                pass
+        return res_data
 
 def handle_decode():
     decoder = request.form.get('decoder', 'DARKTUNNEL')
