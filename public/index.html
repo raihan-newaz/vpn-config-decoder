@@ -35,6 +35,21 @@
         .glow-btn:hover {
             box-shadow: 0 0 25px 0px rgba(59, 130, 246, 0.7);
         }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(59, 130, 246, 0.7);
+        }
     </style>
 </head>
 <body class="bg-[#0B0F19] text-gray-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
@@ -51,7 +66,7 @@
                 </div>
                 <div>
                     <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">Config Decoder</span>
-                    <span class="text-xs px-2 py-0.5 ml-2 font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">বাংলা সাপোর্টেড</span>
+                    <span class="text-xs px-2 py-0.5 ml-2 font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full bangla-text">বাংলা ও প্রটোকল সাপোর্টেড</span>
                 </div>
             </div>
             <div class="flex items-center space-x-3 text-sm">
@@ -71,7 +86,7 @@
                 VPN Configuration Decoder
             </h1>
             <p id="pageDesc" class="text-gray-400 text-sm md:text-base max-w-xl mx-auto bangla-text">
-                Dark Tunnel, HTTP Custom, HTTP Injector, NPV Tunnel এবং SSC কনফিগ ১-ক্লিকে ডিক্রিপ্ট করুন।
+                Dark Tunnel, HTTP Custom, HTTP Injector, NPV Tunnel এবং SSC কনফিগ টেবিল ভিউ ও প্রটোকল সহ ডিক্রিপ্ট করুন।
             </p>
         </div>
 
@@ -85,7 +100,7 @@
             </button>
         </div>
 
-        <!-- Main Card -->
+        <!-- Main Input Card -->
         <div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
 
             <!-- Tool Selector -->
@@ -166,79 +181,87 @@
         <!-- Result Section -->
         <div id="resultSection" class="hidden mt-8 space-y-6">
 
-            <!-- Fast Quick-View Credentials Card -->
-            <div id="quickCard" class="hidden glass-card rounded-3xl p-6 border-blue-500/30 shadow-xl bg-gradient-to-br from-blue-950/30 to-gray-900/60">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-base text-blue-300 flex items-center gap-2">
-                        <i class="fas fa-key"></i> Extracted Credentials
-                    </h3>
-                    <span id="quickProfileName" class="text-xs px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 font-medium bangla-text">Profile</span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
-                    <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-gray-400 block">Server / Host</span>
-                            <span id="quickHost" class="font-mono text-white font-medium">-</span>
-                        </div>
-                        <button onclick="copyText('quickHost')" class="text-gray-400 hover:text-white p-1"><i class="fas fa-copy"></i></button>
+            <!-- Result Card Container -->
+            <div class="glass-card rounded-3xl p-6 md:p-8 shadow-2xl border border-gray-800">
+
+                <!-- Header: Profile Title & Protocol Badge + Action Controls -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-gray-800 gap-4">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <span id="protocolBadge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                            <i class="fas fa-key"></i> <span id="protocolText">SSH</span>
+                        </span>
+                        <h2 id="profileTitle" class="text-xl font-bold text-white tracking-tight bangla-text truncate max-w-md">
+                            Config Profile
+                        </h2>
                     </div>
-                    <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-gray-400 block">Port</span>
-                            <span id="quickPort" class="font-mono text-white font-medium">-</span>
+
+                    <!-- View Switcher & Action Buttons -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <div class="flex bg-gray-900/90 p-1 rounded-xl border border-gray-800">
+                            <button id="btnViewTable" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm flex items-center gap-1.5 transition-all">
+                                <i class="fas fa-table-cells"></i> Table View
+                            </button>
+                            <button id="btnViewJson" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-400 hover:text-white flex items-center gap-1.5 transition-all">
+                                <i class="fas fa-code"></i> { } JSON
+                            </button>
                         </div>
-                        <button onclick="copyText('quickPort')" class="text-gray-400 hover:text-white p-1"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-gray-400 block">Username</span>
-                            <span id="quickUser" class="font-mono text-emerald-400 font-bold">-</span>
-                        </div>
-                        <button onclick="copyText('quickUser')" class="text-gray-400 hover:text-white p-1"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="p-3 bg-gray-900/80 rounded-xl border border-gray-800 flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-gray-400 block">Password</span>
-                            <span id="quickPass" class="font-mono text-emerald-400 font-bold">-</span>
-                        </div>
-                        <button onclick="copyText('quickPass')" class="text-gray-400 hover:text-white p-1"><i class="fas fa-copy"></i></button>
+                        <button id="downloadBtn" class="px-3 py-2 text-xs font-semibold rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 transition-all flex items-center gap-1.5" title="Download Decoded JSON">
+                            <i class="fas fa-download"></i> Save
+                        </button>
                     </div>
                 </div>
-                <div id="quickPayloadBox" class="hidden p-3 bg-gray-900/80 rounded-xl border border-gray-800">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-xs text-gray-400">Payload / Headers</span>
-                        <button onclick="copyText('quickPayload')" class="text-xs text-blue-400 hover:text-blue-300"><i class="fas fa-copy"></i> Copy</button>
+
+                <!-- VIEW 1: TABLE SYSTEM (Main Default View) -->
+                <div id="tableView" class="mt-6 space-y-4">
+                    <div class="overflow-x-auto rounded-2xl border border-gray-800/80 bg-gray-950/40">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-900/80 text-xs uppercase tracking-wider text-gray-400 border-b border-gray-800">
+                                <tr>
+                                    <th class="py-3 px-4 w-44 font-semibold">Parameter</th>
+                                    <th class="py-3 px-4 font-semibold">Decoded Value</th>
+                                    <th class="py-3 px-4 w-28 text-right font-semibold">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-gray-800/60 font-mono text-xs md:text-sm">
+                                <!-- Populated Dynamically -->
+                            </tbody>
+                        </table>
                     </div>
-                    <p id="quickPayload" class="text-xs font-mono text-gray-300 break-all"></p>
+
+                    <!-- Quick JSON Toggle Bar -->
+                    <div class="flex items-center justify-between p-4 bg-gray-900/60 rounded-2xl border border-gray-800">
+                        <div class="flex items-center gap-2 text-xs text-gray-400 bangla-text">
+                            <i class="fas fa-circle-info text-blue-400"></i>
+                            <span>সম্পূর্ণ কাঁচা JSON স্ট্রাকচার দেখতে চান?</span>
+                        </div>
+                        <button onclick="toggleToRawJson()" class="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 transition-all flex items-center gap-1.5">
+                            <i class="fas fa-code"></i> { } View Raw JSON
+                        </button>
+                    </div>
                 </div>
+
+                <!-- VIEW 2: RAW JSON VIEWER -->
+                <div id="jsonView" class="hidden mt-6 space-y-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-gray-400">
+                            <i class="fas fa-file-code mr-1"></i> Decoded Raw JSON Object
+                        </span>
+                        <button id="copyAllJsonBtn" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-all flex items-center gap-1.5 border border-gray-700">
+                            <i class="fas fa-copy"></i> Copy JSON
+                        </button>
+                    </div>
+                    <pre id="outputPre" class="p-4 bg-gray-950/90 rounded-2xl text-xs font-mono text-gray-200 overflow-x-auto max-h-[550px] border border-gray-800 whitespace-pre-wrap"></pre>
+                </div>
+
             </div>
 
-            <!-- Full JSON / Output Viewer -->
-            <div class="glass-card rounded-3xl p-6 shadow-xl">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400">
-                        <i class="fas fa-code mr-1"></i> Decoded Output (বাংলা ও ইউনিকোড ফন্ট সাপোর্টেড)
-                    </span>
-                    <div class="flex items-center space-x-2">
-                        <button id="copyAllBtn" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-all flex items-center gap-1.5 border border-gray-700">
-                            <i class="fas fa-copy"></i> Copy All
-                        </button>
-                        <button id="downloadBtn" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-blue-600/80 hover:bg-blue-600 text-white transition-all flex items-center gap-1.5">
-                            <i class="fas fa-download"></i> Save .json
-                        </button>
-                    </div>
-                </div>
-                <div class="relative">
-                    <pre id="outputPre" class="p-4 bg-gray-950/90 rounded-2xl text-xs font-mono text-gray-200 overflow-x-auto max-h-[500px] border border-gray-800 whitespace-pre-wrap"></pre>
-                </div>
-            </div>
         </div>
 
     </main>
 
     <!-- Footer -->
     <footer class="border-t border-gray-800/60 py-6 text-center text-xs text-gray-500 mt-12 bangla-text">
-        <p>Config Decoder & Encoder • বাংলা ও ইউনিকোড টেক্সট সম্পূর্ণ ক্লিয়ারভাবে দেখার সুবিধাসহ</p>
+        <p>Universal VPN Config Decoder • টেবিল ভিউ, প্রটোকল ডিটেকশন ও বাংলা ফন্ট সাপোর্টেড</p>
     </footer>
 
     <!-- Frontend Script -->
@@ -263,13 +286,27 @@
         const errorMsg = document.getElementById('errorMsg');
         const errorText = document.getElementById('errorText');
         const resultSection = document.getElementById('resultSection');
+        
+        const btnViewTable = document.getElementById('btnViewTable');
+        const btnViewJson = document.getElementById('btnViewJson');
+        const tableView = document.getElementById('tableView');
+        const jsonView = document.getElementById('jsonView');
+        const tableBody = document.getElementById('tableBody');
         const outputPre = document.getElementById('outputPre');
-        const copyAllBtn = document.getElementById('copyAllBtn');
+        const profileTitle = document.getElementById('profileTitle');
+        const protocolBadge = document.getElementById('protocolBadge');
+        const protocolText = document.getElementById('protocolText');
+        
+        const copyAllJsonBtn = document.getElementById('copyAllJsonBtn');
         const downloadBtn = document.getElementById('downloadBtn');
 
         let currentMode = 'decode';
         let currentInputType = 'file';
         let selectedFile = null;
+        let activeView = 'table';
+        let currentRawData = null;
+        let passwordHidden = true;
+        let cachedPassword = '';
 
         // Mode Switch
         modeDecode.addEventListener('click', () => setMode('decode'));
@@ -279,7 +316,7 @@
             currentMode = mode;
             if (mode === 'decode') {
                 pageTitle.textContent = 'VPN Configuration Decoder';
-                pageDesc.textContent = 'Dark Tunnel, HTTP Custom, HTTP Injector, NPV Tunnel এবং SSC কনফিগ ১-ক্লিকে ডিক্রিপ্ট করুন।';
+                pageDesc.textContent = 'Dark Tunnel, HTTP Custom, HTTP Injector, NPV Tunnel এবং SSC কনফিগ টেবিল ভিউ ও প্রটোকল সহ ডিক্রিপ্ট করুন।';
                 btnText.textContent = 'Decode Configuration';
                 modeDecode.className = 'flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-blue-600 text-white shadow-md shadow-blue-600/30';
                 modeEncode.className = 'flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 text-gray-400 hover:text-white';
@@ -344,6 +381,29 @@
             dropZone.classList.remove('hidden');
         });
 
+        // View toggle (Table vs JSON)
+        btnViewTable.addEventListener('click', () => setView('table'));
+        btnViewJson.addEventListener('click', () => setView('json'));
+
+        function setView(view) {
+            activeView = view;
+            if (view === 'table') {
+                tableView.classList.remove('hidden');
+                jsonView.classList.add('hidden');
+                btnViewTable.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm flex items-center gap-1.5 transition-all';
+                btnViewJson.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-400 hover:text-white flex items-center gap-1.5 transition-all';
+            } else {
+                tableView.classList.add('hidden');
+                jsonView.classList.remove('hidden');
+                btnViewJson.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white shadow-sm flex items-center gap-1.5 transition-all';
+                btnViewTable.className = 'px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-400 hover:text-white flex items-center gap-1.5 transition-all';
+            }
+        }
+
+        function toggleToRawJson() {
+            setView('json');
+        }
+
         // Helper to format Unicode and unescape any unicode escape sequences
         function unescapeUnicodeString(str) {
             if (!str || typeof str !== 'string') return str;
@@ -352,11 +412,349 @@
             });
         }
 
+        // Detect protocol accurately from JSON
+        function detectProtocol(data) {
+            const raw = JSON.stringify(data).toLowerCase();
+            
+            // Check Dark Tunnel structures
+            const enc = data.encryptedLockedConfig || {};
+            const inner = enc.EncryptedLockedConfig || {};
+            
+            if (inner.V2rayConfig && (inner.V2rayConfig.EncryptedAddress || inner.V2rayConfig.EncryptedUserId)) {
+                return { name: "VMess", tag: "V2Ray", color: "purple", icon: "fa-bolt" };
+            }
+            if (inner.ShadowsocksConfig && inner.ShadowsocksConfig.EncryptedServer) {
+                return { name: "Shadowsocks", tag: "SS", color: "emerald", icon: "fa-socks" };
+            }
+            if (inner.DnsConfig && inner.DnsConfig.EncryptedNameserver) {
+                return { name: "SlowDNS", tag: "DNSTT", color: "amber", icon: "fa-network-wired" };
+            }
+            if (inner.SshConfig && inner.SshConfig.EncryptedHost) {
+                return { name: "SSH", tag: "Tunnel", color: "blue", icon: "fa-terminal" };
+            }
+
+            // Explicit fields
+            const explicit = (data.protocol || data.proto || data.tunnel_type || data.type || '').toUpperCase();
+            if (explicit.includes("VMESS")) return { name: "VMess", tag: "V2Ray", color: "purple", icon: "fa-bolt" };
+            if (explicit.includes("VLESS")) return { name: "VLESS", tag: "Xray", color: "cyan", icon: "fa-shield-halved" };
+            if (explicit.includes("TROJAN")) return { name: "Trojan", tag: "TLS", color: "amber", icon: "fa-horse-head" };
+            if (explicit.includes("SHADOWSOCKS") || explicit === "SS") return { name: "Shadowsocks", tag: "SS", color: "emerald", icon: "fa-socks" };
+            if (explicit.includes("DNS") || explicit.includes("DNSTT")) return { name: "SlowDNS", tag: "DNSTT", color: "amber", icon: "fa-network-wired" };
+            if (explicit.includes("SSH")) return { name: "SSH", tag: "Tunnel", color: "blue", icon: "fa-terminal" };
+
+            // Look for UUID pattern indicating V2Ray / VMess / VLESS
+            const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+            if (uuidRegex.test(raw)) {
+                if (raw.includes("vless") || raw.includes("reality")) return { name: "VLESS", tag: "Xray", color: "cyan", icon: "fa-shield-halved" };
+                return { name: "VMess", tag: "V2Ray", color: "purple", icon: "fa-bolt" };
+            }
+
+            // Trojan check
+            if (raw.includes("trojan")) return { name: "Trojan", tag: "TLS", color: "amber", icon: "fa-horse-head" };
+
+            // Default SSH
+            return { name: "SSH", tag: "Tunnel", color: "blue", icon: "fa-terminal" };
+        }
+
+        // Apply protocol badge style
+        function renderProtocolBadge(proto) {
+            protocolText.textContent = proto.name;
+            const iconEl = protocolBadge.querySelector('i');
+            iconEl.className = `fas ${proto.icon}`;
+            
+            const colorClasses = {
+                blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+                cyan: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+                amber: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+                emerald: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+            };
+            
+            protocolBadge.className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${colorClasses[proto.color] || colorClasses.blue}`;
+        }
+
+        // Parse comprehensive details from any config JSON
+        function extractConfigTableData(data) {
+            const rows = [];
+            const proto = detectProtocol(data);
+
+            let profileName = data.name || data.remark || data.remarks || '';
+            let host = data.server || data.host || data.hostname || data.address || '';
+            let port = data.port || '';
+            let user = data.username || data.user || data.userId || data.uuid || data.id || '';
+            let pass = data.password || data.pass || data.secret || data.key || '';
+            let sni = data.sni || data.server_name || data.sni_host || '';
+            let payload = data.payload || data.http_payload || '';
+            let wsPath = data.path || data.ws_path || '';
+            let tls = data.tls || data.security || '';
+            let cipher = data.method || data.cipher || '';
+            let expiry = data.expiredDate || data.expiry || data.expire || '';
+            let notes = '';
+
+            // Check Dark Tunnel specific keys
+            const enc = data.encryptedLockedConfig || {};
+            const inner = enc.EncryptedLockedConfig || {};
+            const app = enc.LockedAppConfig || {};
+
+            if (app.ConnectedMessage && !profileName) profileName = app.ConnectedMessage;
+            if (app.ExpiredDate) expiry = app.ExpiredDate;
+            if (app.Notes) notes = app.Notes;
+
+            if (inner.SshConfig) {
+                const s = inner.SshConfig;
+                if (s.EncryptedHost) host = s.EncryptedHost;
+                if (s.EncryptedPort) port = s.EncryptedPort;
+                if (s.EncryptedUsername) user = s.EncryptedUsername;
+                if (s.EncryptedPassword) pass = s.EncryptedPassword;
+            }
+            if (inner.InjectConfig) {
+                const inj = inner.InjectConfig;
+                if (inj.EncryptedPayload) payload = inj.EncryptedPayload;
+                if (inj.EncryptedServerNameIndication) sni = inj.EncryptedServerNameIndication;
+            }
+            if (inner.V2rayConfig) {
+                const v = inner.V2rayConfig;
+                if (v.EncryptedAddress) host = v.EncryptedAddress;
+                if (v.EncryptedPort) port = v.EncryptedPort;
+                if (v.EncryptedUserId) user = v.EncryptedUserId;
+                if (v.EncryptedSecurity) cipher = v.EncryptedSecurity;
+            }
+            if (inner.ShadowsocksConfig) {
+                const ss = inner.ShadowsocksConfig;
+                if (ss.EncryptedServer) host = ss.EncryptedServer;
+                if (ss.EncryptedPort) port = ss.EncryptedPort;
+                if (ss.EncryptedPassword) pass = ss.EncryptedPassword;
+                if (ss.EncryptedMethod) cipher = ss.EncryptedMethod;
+            }
+            if (inner.DnsConfig) {
+                const dns = inner.DnsConfig;
+                if (dns.EncryptedNameserver) host = dns.EncryptedNameserver;
+                port = 53;
+                if (dns.EncryptedPublicKey) user = dns.EncryptedPublicKey;
+            }
+
+            profileName = unescapeUnicodeString(String(profileName || 'Decoded Config'));
+            host = unescapeUnicodeString(String(host));
+            port = String(port);
+            user = unescapeUnicodeString(String(user));
+            pass = unescapeUnicodeString(String(pass));
+            sni = unescapeUnicodeString(String(sni));
+            payload = unescapeUnicodeString(String(payload));
+            expiry = unescapeUnicodeString(String(expiry));
+            notes = unescapeUnicodeString(String(notes));
+
+            cachedPassword = pass;
+            profileTitle.textContent = profileName || 'Unnamed Profile';
+            renderProtocolBadge(proto);
+
+            // 1. Protocol row
+            rows.push({
+                icon: 'fa-network-wired text-blue-400',
+                label: 'Protocol',
+                value: `<span class="font-bold text-white">${proto.name}</span> <span class="text-xs text-gray-400">(${proto.tag})</span>`,
+                copyVal: proto.name,
+                rawHtml: true
+            });
+
+            // 2. Profile Name
+            if (profileName) {
+                rows.push({
+                    icon: 'fa-id-card text-emerald-400',
+                    label: 'Profile / Remark',
+                    value: profileName,
+                    copyVal: profileName,
+                    isBangla: true
+                });
+            }
+
+            // 3. Server Host / IP
+            if (host) {
+                rows.push({
+                    icon: 'fa-server text-cyan-400',
+                    label: 'Server Host / IP',
+                    value: host,
+                    copyVal: host
+                });
+            }
+
+            // 4. Port
+            if (port) {
+                rows.push({
+                    icon: 'fa-plug text-purple-400',
+                    label: 'Port',
+                    value: port,
+                    copyVal: port
+                });
+            }
+
+            // 5. User / UUID
+            if (user) {
+                const isUuid = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}/i.test(user);
+                rows.push({
+                    icon: isUuid ? 'fa-fingerprint text-amber-400' : 'fa-user text-emerald-400',
+                    label: isUuid ? 'UUID (User ID)' : 'Username',
+                    value: user,
+                    copyVal: user
+                });
+            }
+
+            // 6. Password / Secret Key
+            if (pass) {
+                rows.push({
+                    icon: 'fa-key text-yellow-400',
+                    label: 'Password / Key',
+                    value: pass,
+                    copyVal: pass,
+                    isPassword: true
+                });
+            }
+
+            // 7. SNI / Bug Host
+            if (sni) {
+                rows.push({
+                    icon: 'fa-globe text-blue-400',
+                    label: 'SNI / Bug Host',
+                    value: sni,
+                    copyVal: sni
+                });
+            }
+
+            // 8. WS Path
+            if (wsPath) {
+                rows.push({
+                    icon: 'fa-route text-indigo-400',
+                    label: 'WS Path',
+                    value: wsPath,
+                    copyVal: wsPath
+                });
+            }
+
+            // 9. Cipher / Security
+            if (cipher || tls) {
+                rows.push({
+                    icon: 'fa-shield text-gray-400',
+                    label: 'Security / Cipher',
+                    value: `${tls || 'none'} ${cipher ? '• ' + cipher : ''}`.trim(),
+                    copyVal: `${tls} ${cipher}`.trim()
+                });
+            }
+
+            // 10. Payload / HTTP Headers
+            if (payload) {
+                rows.push({
+                    icon: 'fa-file-lines text-orange-400',
+                    label: 'Payload / Headers',
+                    value: payload,
+                    copyVal: payload,
+                    isCodeBlock: true
+                });
+            }
+
+            // 11. Expiry Date
+            if (expiry) {
+                rows.push({
+                    icon: 'fa-calendar-days text-pink-400',
+                    label: 'Expiry Date',
+                    value: expiry,
+                    copyVal: expiry
+                });
+            }
+
+            // 12. Notes
+            if (notes) {
+                rows.push({
+                    icon: 'fa-note-sticky text-yellow-300',
+                    label: 'Notes',
+                    value: notes,
+                    copyVal: notes,
+                    isBangla: true
+                });
+            }
+
+            return rows;
+        }
+
+        // Render Table Rows into HTML
+        function populateDecodedTable(rows) {
+            tableBody.innerHTML = '';
+            
+            rows.forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = idx % 2 === 0 ? 'bg-gray-900/30 hover:bg-gray-800/40 transition-colors' : 'bg-transparent hover:bg-gray-800/40 transition-colors';
+
+                // Label cell
+                const tdLabel = document.createElement('td');
+                tdLabel.className = 'py-3.5 px-4 font-semibold text-gray-300 align-middle flex items-center gap-2.5';
+                tdLabel.innerHTML = `<i class="fas ${row.icon} w-4 text-center"></i> <span>${row.label}</span>`;
+
+                // Value cell
+                const tdVal = document.createElement('td');
+                tdVal.className = 'py-3.5 px-4 text-gray-200 align-middle break-all';
+                
+                if (row.rawHtml) {
+                    tdVal.innerHTML = row.value;
+                } else if (row.isPassword) {
+                    tdVal.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span id="passSpan" class="font-mono text-emerald-400 font-bold tracking-wider">${passwordHidden ? '••••••••••••' : escapeHtml(row.value)}</span>
+                            <button onclick="togglePasswordVisibility()" class="text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition-all">
+                                <i id="passEyeIcon" class="fas ${passwordHidden ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                            </button>
+                        </div>
+                    `;
+                } else if (row.isCodeBlock) {
+                    tdVal.innerHTML = `
+                        <div class="p-2.5 bg-gray-950/80 rounded-xl border border-gray-800 text-xs font-mono text-gray-300 whitespace-pre-wrap max-h-32 overflow-y-auto">
+                            ${escapeHtml(row.value)}
+                        </div>
+                    `;
+                } else {
+                    tdVal.className += row.isBangla ? ' bangla-text text-sm' : ' font-mono';
+                    tdVal.textContent = row.value;
+                }
+
+                // Action cell (Copy button)
+                const tdAction = document.createElement('td');
+                tdAction.className = 'py-3.5 px-4 text-right align-middle';
+                if (row.copyVal) {
+                    const btn = document.createElement('button');
+                    btn.className = 'px-2.5 py-1 text-xs font-medium rounded-lg bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-white border border-gray-700 transition-all inline-flex items-center gap-1.5';
+                    btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                    btn.onclick = () => {
+                        navigator.clipboard.writeText(row.copyVal);
+                        btn.innerHTML = '<i class="fas fa-check text-emerald-400"></i> Done';
+                        setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 1500);
+                    };
+                    tdAction.appendChild(btn);
+                }
+
+                tr.appendChild(tdLabel);
+                tr.appendChild(tdVal);
+                tr.appendChild(tdAction);
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function togglePasswordVisibility() {
+            passwordHidden = !passwordHidden;
+            const span = document.getElementById('passSpan');
+            const eye = document.getElementById('passEyeIcon');
+            if (span && eye) {
+                span.textContent = passwordHidden ? '••••••••••••' : cachedPassword;
+                eye.className = `fas ${passwordHidden ? 'fa-eye' : 'fa-eye-slash'}`;
+            }
+        }
+
         // Submit action
         actionBtn.addEventListener('click', async () => {
             errorMsg.classList.add('hidden');
             resultSection.classList.add('hidden');
-            document.getElementById('quickCard').classList.add('hidden');
 
             const formData = new FormData();
             formData.append('decoder', decoderSelect.value);
@@ -400,15 +798,22 @@
                         formattedResult = unescapeUnicodeString(data.result);
                     }
 
+                    currentRawData = parsedObj || { result: formattedResult };
                     outputPre.textContent = formattedResult;
-                    resultSection.classList.remove('hidden');
                     downloadBtn.dataset.content = formattedResult;
                     downloadBtn.dataset.filename = data.filename || 'config_decoded.json';
 
+                    // Parse table data
                     if (parsedObj) {
-                        populateQuickView(parsedObj);
+                        passwordHidden = true;
+                        const tableRows = extractConfigTableData(parsedObj);
+                        populateDecodedTable(tableRows);
+                        setView('table');
+                    } else {
+                        setView('json');
                     }
 
+                    resultSection.classList.remove('hidden');
                     resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else {
                     showError(data.error || 'কনফিগ প্রসেস করতে ব্যর্থ হয়েছে।');
@@ -422,54 +827,16 @@
             }
         });
 
-        function populateQuickView(jsonObj) {
-            let host = '', port = '', user = '', pass = '', payload = '', name = '';
-            
-            const enc = jsonObj.encryptedLockedConfig || {};
-            const inner = enc.EncryptedLockedConfig || {};
-            const ssh = inner.SshConfig || {};
-            const inject = inner.InjectConfig || {};
-            
-            host = ssh.EncryptedHost || jsonObj.server || jsonObj.host || '';
-            port = ssh.EncryptedPort || jsonObj.port || '';
-            user = ssh.EncryptedUsername || jsonObj.user || jsonObj.username || '';
-            pass = ssh.EncryptedPassword || jsonObj.pass || jsonObj.password || '';
-            payload = inject.EncryptedPayload || jsonObj.payload || '';
-            name = (enc.LockedAppConfig && enc.LockedAppConfig.ConnectedMessage) || jsonObj.name || 'Config';
-
-            if (host || user || pass) {
-                document.getElementById('quickHost').textContent = unescapeUnicodeString(String(host)) || 'N/A';
-                document.getElementById('quickPort').textContent = String(port) || 'N/A';
-                document.getElementById('quickUser').textContent = unescapeUnicodeString(String(user)) || 'N/A';
-                document.getElementById('quickPass').textContent = unescapeUnicodeString(String(pass)) || 'N/A';
-                document.getElementById('quickProfileName').textContent = unescapeUnicodeString(String(name));
-                
-                if (payload) {
-                    document.getElementById('quickPayload').textContent = unescapeUnicodeString(String(payload));
-                    document.getElementById('quickPayloadBox').classList.remove('hidden');
-                } else {
-                    document.getElementById('quickPayloadBox').classList.add('hidden');
-                }
-                document.getElementById('quickCard').classList.remove('hidden');
-            }
-        }
-
         function showError(msg) {
             errorText.textContent = msg;
             errorMsg.classList.remove('hidden');
             errorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        function copyText(elemId) {
-            const text = document.getElementById(elemId).textContent;
-            navigator.clipboard.writeText(text);
-            alert('কপি হয়েছে: ' + text);
-        }
-
-        copyAllBtn.addEventListener('click', () => {
+        copyAllJsonBtn.addEventListener('click', () => {
             navigator.clipboard.writeText(outputPre.textContent);
-            copyAllBtn.innerHTML = '<i class="fas fa-check text-emerald-400"></i> Copied!';
-            setTimeout(() => { copyAllBtn.innerHTML = '<i class="fas fa-copy"></i> Copy All'; }, 1800);
+            copyAllJsonBtn.innerHTML = '<i class="fas fa-check text-emerald-400"></i> Copied!';
+            setTimeout(() => { copyAllJsonBtn.innerHTML = '<i class="fas fa-copy"></i> Copy JSON'; }, 1800);
         });
 
         downloadBtn.addEventListener('click', () => {
