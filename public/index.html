@@ -12,6 +12,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
+    <!-- Pure Client-side QRCode Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
         body {
             font-family: 'Plus Jakarta Sans', 'Hind Siliguri', 'Noto Sans Bengali', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -66,7 +69,7 @@
                 </div>
                 <div>
                     <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">Config Decoder</span>
-                    <span class="text-xs px-2 py-0.5 ml-2 font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full bangla-text">বাংলা ও প্রটোকল সাপোর্টেড</span>
+                    <span class="text-xs px-2 py-0.5 ml-2 font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full bangla-text">QR কোড ও অটো-কানেক্ট সাপোর্টেড</span>
                 </div>
             </div>
             <div class="flex items-center space-x-3 text-sm">
@@ -86,7 +89,7 @@
                 VPN Configuration Decoder
             </h1>
             <p id="pageDesc" class="text-gray-400 text-sm md:text-base max-w-xl mx-auto bangla-text">
-                Dark Tunnel, HTTP Custom, HTTP Injector, NPV Tunnel এবং SSC কনফিগ টেবিল ভিউ ও প্রটোকল সহ ডিক্রিপ্ট করুন।
+                Dark Tunnel, HTTP Custom, HTTP Injector, NPV ও SSC ডিক্রিপ্ট করুন এবং QR Code স্ক্যান করে সহজেই অটো-কানেক্ট করুন।
             </p>
         </div>
 
@@ -206,8 +209,57 @@
                             </button>
                         </div>
                         <button id="downloadBtn" class="px-3 py-2 text-xs font-semibold rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white border border-gray-700 transition-all flex items-center gap-1.5" title="Download Decoded JSON">
-                            <i class="fas fa-download"></i> Save
+                            <i class="fas fa-download"></i> Save .json
                         </button>
+                    </div>
+                </div>
+
+                <!-- AUTO-CONNECT & QR CODE CARD -->
+                <div id="connectCard" class="mt-6 p-5 rounded-2xl bg-gradient-to-br from-blue-950/40 via-indigo-950/20 to-gray-900/80 border border-blue-500/30 flex flex-col md:flex-row items-center gap-6 shadow-xl">
+                    <!-- QR Box -->
+                    <div class="flex-shrink-0 p-3 bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center">
+                        <div id="qrcodeBox" class="w-36 h-36 flex items-center justify-center"></div>
+                        <button id="downloadQrBtn" class="mt-2 text-[11px] font-bold text-gray-800 hover:text-blue-600 flex items-center gap-1 transition-colors cursor-pointer">
+                            <i class="fas fa-arrow-down-to-bracket"></i> Save QR Image
+                        </button>
+                    </div>
+
+                    <!-- Auto-Connect Controls & App Badges -->
+                    <div class="flex-1 w-full space-y-3">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <span class="text-xs font-bold text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fas fa-qrcode"></i> Instant Auto-Connect (QR & 1-Click Link)
+                            </span>
+                            <div class="flex items-center gap-1.5 text-[11px] font-medium flex-wrap">
+                                <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">V2RayNG</span>
+                                <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">Dark Tunnel</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HTTP Custom</span>
+                                <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Sing-box</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-gray-300 bangla-text">
+                            মোবাইলে ভিপিএন অ্যাপে <strong>Scan QR Code</strong> চাপুন অথবা নিচের <strong>Auto-Connect Link</strong> কপি করে সরাসরি ইমপোর্ট ও কানেক্ট করুন:
+                        </p>
+
+                        <!-- Primary Auto-Connect Input & Button -->
+                        <div class="flex items-center gap-2">
+                            <input id="connectUriInput" type="text" readonly class="flex-1 bg-gray-950/90 border border-gray-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-cyan-300 select-all focus:outline-none truncate">
+                            <button id="copyConnectUriBtn" class="px-4 py-2.5 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5 shadow-md shadow-blue-600/30 transition-all flex-shrink-0 cursor-pointer">
+                                <i class="fas fa-copy"></i> Copy Link
+                            </button>
+                        </div>
+
+                        <!-- Secondary Alternate Format (host:port@user:pass) -->
+                        <div id="altLinkBox" class="hidden items-center justify-between p-2.5 bg-gray-950/60 rounded-xl border border-gray-800/80 text-xs">
+                            <div class="flex items-center gap-2 overflow-hidden mr-2">
+                                <span class="text-gray-400 font-semibold flex-shrink-0">HTTP Custom Format:</span>
+                                <span id="altLinkText" class="font-mono text-gray-300 truncate"></span>
+                            </div>
+                            <button id="copyAltLinkBtn" class="px-2 py-1 text-[11px] font-medium rounded-lg bg-gray-800 hover:bg-gray-700 text-blue-400 hover:text-blue-300 border border-gray-700 flex-shrink-0">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -261,7 +313,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-gray-800/60 py-6 text-center text-xs text-gray-500 mt-12 bangla-text">
-        <p>Universal VPN Config Decoder • টেবিল ভিউ, প্রটোকল ডিটেকশন ও বাংলা ফন্ট সাপোর্টেড</p>
+        <p>Universal VPN Config Decoder • টেবিল ভিউ, QR Code, অটো-কানেক্ট ও বাংলা ফন্ট সাপোর্টেড</p>
     </footer>
 
     <!-- Frontend Script -->
@@ -297,6 +349,14 @@
         const protocolBadge = document.getElementById('protocolBadge');
         const protocolText = document.getElementById('protocolText');
         
+        const qrcodeBox = document.getElementById('qrcodeBox');
+        const connectUriInput = document.getElementById('connectUriInput');
+        const copyConnectUriBtn = document.getElementById('copyConnectUriBtn');
+        const downloadQrBtn = document.getElementById('downloadQrBtn');
+        const altLinkBox = document.getElementById('altLinkBox');
+        const altLinkText = document.getElementById('altLinkText');
+        const copyAltLinkBtn = document.getElementById('copyAltLinkBtn');
+
         const copyAllJsonBtn = document.getElementById('copyAllJsonBtn');
         const downloadBtn = document.getElementById('downloadBtn');
 
@@ -307,6 +367,7 @@
         let currentRawData = null;
         let passwordHidden = true;
         let cachedPassword = '';
+        let qrCodeInstance = null;
 
         // Mode Switch
         modeDecode.addEventListener('click', () => setMode('decode'));
@@ -316,7 +377,7 @@
             currentMode = mode;
             if (mode === 'decode') {
                 pageTitle.textContent = 'VPN Configuration Decoder';
-                pageDesc.textContent = 'Dark Tunnel, HTTP Custom, HTTP Injector, NPV Tunnel এবং SSC কনফিগ টেবিল ভিউ ও প্রটোকল সহ ডিক্রিপ্ট করুন।';
+                pageDesc.textContent = 'Dark Tunnel, HTTP Custom, HTTP Injector, NPV ও SSC ডিক্রিপ্ট করুন এবং QR Code স্ক্যান করে সহজেই অটো-কানেক্ট করুন।';
                 btnText.textContent = 'Decode Configuration';
                 modeDecode.className = 'flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 bg-blue-600 text-white shadow-md shadow-blue-600/30';
                 modeEncode.className = 'flex-1 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 text-gray-400 hover:text-white';
@@ -473,6 +534,70 @@
             protocolBadge.className = `px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${colorClasses[proto.color] || colorClasses.blue}`;
         }
 
+        // Render QR Code in high contrast
+        function renderQrCode(text) {
+            qrcodeBox.innerHTML = '';
+            if (!text) return;
+            try {
+                qrCodeInstance = new QRCode(qrcodeBox, {
+                    text: text,
+                    width: 144,
+                    height: 144,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            } catch (err) {
+                console.error("QR Code Error:", err);
+            }
+        }
+
+        // Generate Standard Auto-Connect URI for any VPN protocol
+        function generateAutoConnectUri(proto, host, port, user, pass, sni, wsPath, cipher, tls, profileName) {
+            const protoName = proto.name.toUpperCase();
+            const enc = encodeURIComponent;
+
+            if (protoName.includes('VMESS')) {
+                const vmessObj = {
+                    v: "2",
+                    ps: profileName || "VMess-Config",
+                    add: host,
+                    port: String(port),
+                    id: user,
+                    aid: "0",
+                    scy: cipher || "auto",
+                    net: "ws",
+                    type: "none",
+                    host: sni || host,
+                    path: wsPath || "/",
+                    tls: (tls && tls !== 'none') ? tls : ""
+                };
+                const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(vmessObj))));
+                return "vmess://" + b64;
+            }
+
+            if (protoName.includes('VLESS')) {
+                return `vless://${user}@${host}:${port}?encryption=none&security=${(tls && tls !== 'none') ? tls : 'none'}&sni=${enc(sni || host)}&type=ws&path=${enc(wsPath || '/')}#${enc(profileName || 'VLESS')}`;
+            }
+
+            if (protoName.includes('TROJAN')) {
+                return `trojan://${pass}@${host}:${port}?security=tls&sni=${enc(sni || host)}&type=ws&path=${enc(wsPath || '/')}#${enc(profileName || 'Trojan')}`;
+            }
+
+            if (protoName.includes('SHADOWSOCKS') || protoName === 'SS') {
+                const method = cipher || 'aes-256-gcm';
+                const creds = btoa(`${method}:${pass}`);
+                return `ss://${creds}@${host}:${port}#${enc(profileName || 'Shadowsocks')}`;
+            }
+
+            // Universal SSH Link
+            if (user && pass && host) {
+                return `ssh://${enc(user)}:${enc(pass)}@${host}:${port}#${enc(profileName || 'SSH')}`;
+            }
+
+            return `ssh://${host}:${port}`;
+        }
+
         // Parse comprehensive details from any config JSON
         function extractConfigTableData(data) {
             const rows = [];
@@ -546,6 +671,27 @@
             cachedPassword = pass;
             profileTitle.textContent = profileName || 'Unnamed Profile';
             renderProtocolBadge(proto);
+
+            // Generate Auto-Connect URI
+            const autoConnectUri = generateAutoConnectUri(proto, host, port, user, pass, sni, wsPath, cipher, tls, profileName);
+            connectUriInput.value = autoConnectUri;
+            renderQrCode(autoConnectUri);
+
+            // Alternate HTTP Custom format if SSH
+            if (host && port && user && pass) {
+                altLinkBox.classList.remove('hidden');
+                altLinkBox.classList.add('flex');
+                const hcString = `${host}:${port}@${user}:${pass}`;
+                altLinkText.textContent = hcString;
+                copyAltLinkBtn.onclick = () => {
+                    navigator.clipboard.writeText(hcString);
+                    copyAltLinkBtn.innerHTML = '<i class="fas fa-check text-emerald-400"></i> Copied!';
+                    setTimeout(() => { copyAltLinkBtn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 1500);
+                };
+            } else {
+                altLinkBox.classList.add('hidden');
+                altLinkBox.classList.remove('flex');
+            }
 
             // 1. Protocol row
             rows.push({
@@ -697,7 +843,7 @@
                     tdVal.innerHTML = `
                         <div class="flex items-center gap-2">
                             <span id="passSpan" class="font-mono text-emerald-400 font-bold tracking-wider">${passwordHidden ? '••••••••••••' : escapeHtml(row.value)}</span>
-                            <button onclick="togglePasswordVisibility()" class="text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition-all">
+                            <button onclick="togglePasswordVisibility()" class="text-xs px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 transition-all cursor-pointer">
                                 <i id="passEyeIcon" class="fas ${passwordHidden ? 'fa-eye' : 'fa-eye-slash'}"></i>
                             </button>
                         </div>
@@ -718,7 +864,7 @@
                 tdAction.className = 'py-3.5 px-4 text-right align-middle';
                 if (row.copyVal) {
                     const btn = document.createElement('button');
-                    btn.className = 'px-2.5 py-1 text-xs font-medium rounded-lg bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-white border border-gray-700 transition-all inline-flex items-center gap-1.5';
+                    btn.className = 'px-2.5 py-1 text-xs font-medium rounded-lg bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-white border border-gray-700 transition-all inline-flex items-center gap-1.5 cursor-pointer';
                     btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
                     btn.onclick = () => {
                         navigator.clipboard.writeText(row.copyVal);
@@ -750,6 +896,34 @@
                 eye.className = `fas ${passwordHidden ? 'fa-eye' : 'fa-eye-slash'}`;
             }
         }
+
+        // Copy Connect Link button
+        copyConnectUriBtn.addEventListener('click', () => {
+            const link = connectUriInput.value;
+            if (!link) return;
+            navigator.clipboard.writeText(link);
+            copyConnectUriBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => { copyConnectUriBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Link'; }, 1800);
+        });
+
+        // Download QR Code Image
+        downloadQrBtn.addEventListener('click', () => {
+            const img = document.querySelector('#qrcodeBox img');
+            if (img && img.src) {
+                const a = document.createElement('a');
+                a.href = img.src;
+                a.download = `${profileTitle.textContent || 'vpn_config'}_qrcode.png`;
+                a.click();
+            } else {
+                const canvas = document.querySelector('#qrcodeBox canvas');
+                if (canvas) {
+                    const a = document.createElement('a');
+                    a.href = canvas.toDataURL("image/png");
+                    a.download = `${profileTitle.textContent || 'vpn_config'}_qrcode.png`;
+                    a.click();
+                }
+            }
+        });
 
         // Submit action
         actionBtn.addEventListener('click', async () => {
@@ -803,7 +977,7 @@
                     downloadBtn.dataset.content = formattedResult;
                     downloadBtn.dataset.filename = data.filename || 'config_decoded.json';
 
-                    // Parse table data
+                    // Parse table data and generate QR Code
                     if (parsedObj) {
                         passwordHidden = true;
                         const tableRows = extractConfigTableData(parsedObj);
